@@ -7,10 +7,14 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { ListAgendaDto } from './dto/list-agenda.dto';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class AppointmentsService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly mailService: MailService,
+  ) {}
 
   create = async (
     clientId: number,
@@ -33,6 +37,7 @@ export class AppointmentsService {
       where: { id: availabilityId },
       include: {
         appointment: true,
+        nutritionist: true,
       },
     });
 
@@ -60,6 +65,36 @@ export class AppointmentsService {
       });
 
       return createdAppointment;
+    });
+
+    const clientName = client.name ?? 'Client';
+
+    await this.mailService.sendNutritionistAppointmentScheduled({
+      to: availability.nutritionist.email,
+      clientName: clientName,
+      date: availability.date.toLocaleDateString('pt-BR'),
+      startTime: availability.startTime.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      endTime: availability.endTime.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+    });
+
+    await this.mailService.sendAppointmentScheduled({
+      to: client.email,
+      name: clientName,
+      date: availability.date.toLocaleDateString('pt-BR'),
+      startTime: availability.startTime.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      endTime: availability.endTime.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
     });
 
     return {
@@ -159,20 +194,28 @@ export class AppointmentsService {
         totalPages: Math.ceil(total / limit),
       },
     };
-  };wsl
+  };
 
-  completeAppointment = async (
+  confirmAppointment = async (
     appointmentId: number,
     nutritionistId: number,
   ) => {
     const appointment = await this.prismaService.appointment.findUnique({
       where: { id: appointmentId },
       include: {
-        availability: true,
+        availability: {
+          include: {
+            nutritionist: true,
+          },
+        },
+        client: true,
       },
     });
 
-    if (!appointment) throw new NotFoundException('Horário não encontrado');
+    if (!appointment) {
+      throw new NotFoundException('Horário não encontrado');
+    }
+
     if (appointment.availability.nutritionistId !== nutritionistId) {
       throw new ForbiddenException('Você não pode confirmar essa consulta');
     }
@@ -188,8 +231,24 @@ export class AppointmentsService {
       },
     });
 
+    const clientName = appointment.client.name ?? 'Cliente';
+
+    await this.mailService.sendAppointmentConfirm({
+      to: appointment.client.email,
+      name: clientName,
+      date: appointment.availability.date.toLocaleDateString('pt-BR'),
+      startTime: appointment.availability.startTime.toLocaleTimeString(
+        'pt-BR',
+        { hour: '2-digit', minute: '2-digit' },
+      ),
+      endTime: appointment.availability.endTime.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+    });
+
     return {
-      message: 'Consulta finalizada com sucesso',
+      message: 'Consulta confirmada com sucesso',
     };
   };
 
@@ -197,7 +256,16 @@ export class AppointmentsService {
     const appointment = await this.prismaService.appointment.findUnique({
       where: { id: appointmentId },
       include: {
-        availability: true,
+        availability: {
+          select: {
+            date: true,
+            startTime: true,
+            endTime: true,
+            
+            nutritionist: true,
+          }
+        },
+        client: true,
       },
     });
 
@@ -223,6 +291,42 @@ export class AppointmentsService {
           isBooked: false,
         },
       });
+    });
+
+    const clientName = appointment.client.name ?? 'Cliente';
+
+    await this.mailService.sendNutritionistAppointmentCanceled({
+      to: appointment.availability.nutritionist.email,
+      clientName: clientName,
+      date: appointment.availability.date.toLocaleDateString('pt-BR'),
+      startTime: appointment.availability.startTime.toLocaleTimeString(
+        'pt-BR',
+        {
+          hour: '2-digit',
+          minute: '2-digit',
+        },
+      ),
+      endTime: appointment.availability.endTime.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+    });
+
+    await this.mailService.sendAppointmentCancel({
+      to: appointment.client.email,
+      name: clientName,
+      date: appointment.availability.date.toLocaleDateString('pt-BR'),
+      startTime: appointment.availability.startTime.toLocaleTimeString(
+        'pt-BR',
+        {
+          hour: '2-digit',
+          minute: '2-digit',
+        },
+      ),
+      endTime: appointment.availability.endTime.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
     });
 
     return {

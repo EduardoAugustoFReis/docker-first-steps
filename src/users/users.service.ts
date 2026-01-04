@@ -24,10 +24,12 @@ export class UsersService {
       data: {
         email: createUserDto.email,
         password: passwordHashed,
+        name: createUserDto.name,
       },
       select: {
         id: true,
         email: true,
+        name: true,
         createdAt: true,
         role: true,
       },
@@ -47,6 +49,7 @@ export class UsersService {
         select: {
           id: true,
           email: true,
+          name: true,
           createdAt: true,
           role: true,
         },
@@ -68,6 +71,7 @@ export class UsersService {
       select: {
         id: true,
         email: true,
+        name: true,
         createdAt: true,
         role: true,
       },
@@ -111,11 +115,13 @@ export class UsersService {
       where: { id: user.id },
       data: {
         email: updateUserDto.email ?? user.email,
+        name: updateUserDto.name ?? user.name,
         password: password,
       },
       select: {
         id: true,
         email: true,
+        name: true,
         createdAt: true,
         role: true,
       },
@@ -149,6 +155,7 @@ export class UsersService {
       select: {
         id: true,
         email: true,
+        name: true,
         role: true,
       },
     });

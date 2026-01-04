@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { AvailabilityModule } from './availability/availability.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AvailabilityModule } from './availability/availability.module';
     AuthModule,
     AppointmentsModule,
     AvailabilityModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

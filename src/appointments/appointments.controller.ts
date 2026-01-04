@@ -56,7 +56,7 @@ export class AppointmentsController {
     @Req() req,
   ) {
     const nutritionistId = req.user.id;
-    return this.appointmentsService.completeAppointment(
+    return this.appointmentsService.confirmAppointment(
       appointmentId,
       nutritionistId,
     );
