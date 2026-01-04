@@ -1,98 +1,184 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 📅 Agenda API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API REST desenvolvida com **NestJS** para gerenciamento de agenda entre **clientes** e **nutricionistas**, permitindo criação de usuários, autenticação, definição de disponibilidade, agendamento de consultas e envio de notificações por e-mail.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Este projeto foi desenvolvido com foco nas boas práticas de backend e estudo de **Docker**, **PostgreSQL**, **Prisma**, **JWT** e **NestJS**.
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🚀 Tecnologias Utilizadas
 
-## Project setup
+* **Node.js 20**
+* **NestJS**
+* **PostgreSQL**
+* **Prisma ORM**
+* **JWT Authentication**
+* **Role-based Access Control (RBAC)**
+* **Docker & Docker Compose**
+* **Nodemailer (SMTP / Mailtrap)**
 
-```bash
-$ npm install
+---
+
+## 🧩 Funcionalidades
+
+### 👤 Usuários
+
+* Cadastro de usuários
+* Listagem paginada de usuários
+* Detalhes de um usuário
+* Atualização e remoção
+* Promoção de usuário para **NUTRITIONIST** (apenas ADMIN)
+
+### 🔐 Autenticação
+
+* Login com e-mail e senha
+* Geração de token JWT
+* Endpoint para obter usuário autenticado (`/auth/me`)
+
+### 🗓️ Disponibilidade (Nutritionist)
+
+* Criar horários disponíveis
+* Listar próprios horários
+* Remover horários
+
+### 📅 Agendamentos (Appointments)
+
+* Cliente agenda consulta
+* Cliente lista seus agendamentos
+* Nutricionista visualiza agenda (com filtros)
+* Nutricionista confirma consulta
+* Cliente cancela consulta
+
+### ✉️ E-mails Automáticos
+
+* Consulta agendada (cliente)
+* Consulta confirmada (cliente)
+* Consulta cancelada (cliente)
+* Nova consulta agendada (nutricionista)
+* Consulta cancelada (nutricionista)
+
+---
+
+## 🔑 Papéis do Sistema
+
+* **CLIENT**: usuário padrão
+* **NUTRITIONIST**: pode criar disponibilidade e gerenciar agenda
+* **ADMIN**: pode promover usuários
+
+O controle é feito via **Guards + Decorators (`@Roles`)**.
+
+---
+
+## 🧪 Rotas Principais
+
+### Auth
+
+```
+POST   /auth        -> login
+GET    /auth/me     -> usuário autenticado
 ```
 
-## Compile and run the project
+### Users
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```
+POST   /users
+GET    /users
+GET    /users/:id
+PATCH  /users/:id
+DELETE /users/:id
+PATCH  /users/:id/promote-to-nutritionist (ADMIN)
 ```
 
-## Run tests
+### Availability
 
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+```
+POST   /availability            (NUTRITIONIST)
+GET    /availability            (CLIENT)
+GET    /availability/me         (NUTRITIONIST)
+DELETE /availability/:id        (NUTRITIONIST)
 ```
 
-## Deployment
+### Appointments
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+```
+POST   /appointments                  (CLIENT)
+GET    /appointments/my               (CLIENT)
+GET    /appointments/nutritionist/agenda (NUTRITIONIST)
+PATCH  /appointments/:id/confirm      (NUTRITIONIST)
+PATCH  /appointments/:id/cancel       (CLIENT)
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Resources
+## ⚙️ Variáveis de Ambiente
 
-Check out a few resources that may come in handy when working with NestJS:
+Crie um arquivo `.env` baseado no `.env.example`:
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```env
+DATABASE_URL=postgresql://USER:PASSWORD@postgres:5432/DB_NAME
+DATABASE_URL_LOCAL=postgresql://USER:PASSWORD@localhost:5432/DB_NAME
 
-## Support
+JWT_SECRET=your_jwt_secret_here
+JWT_EXPIRES_IN=1d
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+MAIL_HOST=sandbox.smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USER=your_mail_user
+MAIL_PASS=your_mail_pass
+MAIL_FROM=no-reply@agenda.com
+```
 
-## Stay in touch
+---
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## 🐳 Rodando com Docker
 
-## License
+* Para subir o container 
+```bash
+docker-compose up 
+```
+* Para subir o container sem travar o terminal
+ ```bash
+docker-compose up -d 
+```
+* Para parar o container
+```bash
+docker-compose down
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+A API estará disponível em:
+
+```
+http://localhost:3000
+```
+
+---
+
+## 🛠️ Rodando Localmente (sem Docker)
+
+```bash
+npm install
+npm run prisma:generate
+npm run prisma:migrate
+npm run start:dev
+```
+
+---
+
+## 📌 Observações
+* O envio de e-mails usa **Mailtrap** para ambiente de desenvolvimento
+---
+
+## 📚 Objetivo do Projeto
+
+Este projeto foi criado com o objetivo de:
+
+* Praticar arquitetura backend
+* Aprender Docker na prática
+* Trabalhar com autenticação, autorização e domínio real
+* Envio de E-mail 
+---
+
+## 📄 Licença
+
+Este projeto é apenas para fins educacionais e de portfólio.
