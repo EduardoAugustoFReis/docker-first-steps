@@ -1,0 +1,26 @@
+# dependências locais
+node_modules
+
+# build local
+dist
+
+# git
+.git
+.gitignore
+
+# logs
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# env
+.env
+.env.*
+
+# prisma
+prisma/migrations
+
+# cache
+.cache
+.next
+coverage
